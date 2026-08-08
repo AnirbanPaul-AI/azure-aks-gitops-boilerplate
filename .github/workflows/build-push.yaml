@@ -1,0 +1,35 @@
+name: Build and Push to ACR
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'app/**'
+      - '.github/workflows/build-push.yaml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: ACR Login
+      run: az acr login --name ${{ secrets.ACR_NAME }}
+
+    - name: Build and Push
+      run: |
+        ACR_NAME=${{ secrets.ACR_NAME }}
+        IMAGE=$ACR_NAME.azurecr.io/fastapi-app:${{ github.sha }}
+        docker build -t $IMAGE -f app/Dockerfile app/
+        docker push $IMAGE
+        echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+    - name: Update K8s manifest
+      run: |
+        sed -i "s|PLACEHOLDER_ACR_IMAGE|${{ env.IMAGE }}|g" k8s/base/deployment.yaml
+        cat k8s/base/deployment.yaml
