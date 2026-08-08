@@ -1,0 +1,25 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+crash.log
+crash.*.log
+*.tfplan
+
+# Azure
+.azure/
+
+# Kube
+kubeconfig
+*.kubeconfig
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.env
+
+# OS
+.DS_Store
+Thumbs.db
